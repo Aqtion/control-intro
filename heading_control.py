@@ -75,10 +75,9 @@ def main():
     # ask user for depth
     desired_heading_deg = float(input("Enter target heading: "))
 
-    # TODO: convert heading to radians
-    desired_heading = None
+    desired_heading = np.deg2rad(desired_heading_deg)
 
-    pid = PID(0.5, 0.0, 10.0, 100)
+    pid = PID(8, 0.3, 1, 100)
 
     while True:
         # get yaw from the vehicle

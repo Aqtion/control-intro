@@ -56,6 +56,7 @@ def main():
 
     # wait for the heartbeat message to find the system ID
     mav.wait_heartbeat()
+    desired_heading_deg = float(input("Enter target heading: "))
 
     # arm the vehicle
     print("Arming")
@@ -71,9 +72,9 @@ def main():
         19,  # Manual mode
     )
     print("Mode set to MANUAL")
+    set_rotation_power(mav, 0)
 
     # ask user for depth
-    desired_heading_deg = float(input("Enter target heading: "))
 
     if desired_heading_deg > 180:
         desired_heading_deg = desired_heading_deg - 360
@@ -115,11 +116,22 @@ def main():
         output = pid.update(error, error_derivative=yaw_rate)
         print("Output: ", output)
 
+        # Implementation by mapping to sine
+
+        # error = error % (2 * np.pi) - np.pi
+        # if error > np.pi / 2:
+        #     error = 1
+        # elif error < - np.pi / 2:
+        #     error = -1
+        # else:
+        #     error = np.sin(error)
         # set vertical power
-        if output < 0:
-            set_rotation_power(mav, -output)
-        else:
-            set_rotation_power(mav, output)
+
+        # if output < 0:
+        #     set_rotation_power(mav, -output)
+        # else:
+        #     set_rotation_power(mav, output)
+        set_rotation_power(mav, output)
 
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ class PID:
 
         self.last_time = current_time
 
-        self.integral = self._get_integral(error, dt)
+        self.integral = min(self.integral_limit, self._get_integral(error, dt))
         if error_derivative is None:
             derivative = self._get_derivative(error, dt)
         else:

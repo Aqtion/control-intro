@@ -71,6 +71,9 @@ def main():
     # wait for the heartbeat message to find the system ID
     mav.wait_heartbeat()
 
+    # ask user for depth
+    desired_depth = 0.5
+
     # arm the vehicle
     print("Arming")
     mav.arducopter_arm()
@@ -85,14 +88,13 @@ def main():
         19,  # Manual mode
     )
     print("Mode set to MANUAL")
+    set_vertical_power(mav, 0)
 
-    # ask user for depth
-    desired_depth = float(input("Enter target depth: "))
-    pid = PID(6, 0.2, 0.5, 100)
+    pid = PID(40, 0, -0.2, 20)
 
     while True:
         # get pressure from the vehicle
-        msg = mav.recv_match(type="SCALED_PRESSURE", blocking=True)
+        msg = mav.recv_match(type="SCALED_PRESSURE2", blocking=True)
         press_abs = msg.press_abs  # in hPa
 
         # calculate depth

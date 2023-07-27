@@ -75,9 +75,12 @@ def main():
     # ask user for depth
     desired_heading_deg = float(input("Enter target heading: "))
 
+    if desired_heading_deg > 180:
+        desired_heading_deg = 180 - desired_heading_deg
+
     desired_heading = np.deg2rad(desired_heading_deg)
 
-    pid = PID(8, 0.3, 1, 100)
+    pid = PID(35, 0, 2, 100)
 
     while True:
         # get yaw from the vehicle
@@ -88,14 +91,32 @@ def main():
         print("Heading: ", np.rad2deg(yaw))
 
         # calculate error
-        error = desired_heading - yaw
+        if desired_heading - yaw > 0 and desired_heading - yaw < 2 * np.pi:
+            clockwise_error = (yaw - desired_heading) % (2 * np.pi)
+        else:
+            clockwise_error = (desired_heading - yaw) % (2 * np.pi)
+        counter_clockwise_error = desired_heading - yaw
+
+        clockwise_deg_error = np.rad2deg(clockwise_error)
+        counter_clockwise_deg_error = np.rad2deg(counter_clockwise_error)
+
+        c_e = abs(clockwise_error)
+        cc_e = abs(counter_clockwise_error)
+
+        if c_e < cc_e:
+            error = clockwise_error
+            output = pid.update(error, error_derivative=yaw_rate)
+        elif c_e > cc_e:
+            error = counter_clockwise_error
+            output = pid.update(error, error_derivative=yaw_rate)
+
         print("Error: ", np.rad2deg(error))
 
         output = pid.update(error, error_derivative=yaw_rate)
         print("Output: ", output)
 
         # set vertical power
-        set_rotation_power(mav, -output)
+        set_rotation_power(mav, output)
 
 
 if __name__ == "__main__":

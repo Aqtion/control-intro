@@ -76,11 +76,11 @@ def main():
     desired_heading_deg = float(input("Enter target heading: "))
 
     if desired_heading_deg > 180:
-        desired_heading_deg = 180 - desired_heading_deg
+        desired_heading_deg = desired_heading_deg - 360
 
     desired_heading = np.deg2rad(desired_heading_deg)
 
-    pid = PID(35, 0, 2, 100)
+    pid = PID(25, 0, 0, 100)
 
     while True:
         # get yaw from the vehicle
@@ -116,7 +116,10 @@ def main():
         print("Output: ", output)
 
         # set vertical power
-        set_rotation_power(mav, output)
+        if output < 0:
+            set_rotation_power(mav, -output)
+        else:
+            set_rotation_power(mav, output)
 
 
 if __name__ == "__main__":

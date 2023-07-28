@@ -81,7 +81,7 @@ def main():
 
     desired_heading = np.deg2rad(desired_heading_deg)
 
-    pid = PID(25, 0, 0, 100)
+    pid = PID(30, 0, -0.5, 100)
 
     while True:
         # get yaw from the vehicle
@@ -92,11 +92,16 @@ def main():
         print("Heading: ", np.rad2deg(yaw))
 
         # calculate error
-        if desired_heading - yaw > 0 and desired_heading - yaw < 2 * np.pi:
-            clockwise_error = (yaw - desired_heading) % (2 * np.pi)
+        clockwise_error = (desired_heading - yaw) % (2 * np.pi)
+
+        if (desired_heading <= np.pi and desired_heading >= 0) and (
+            yaw > -np.pi and yaw < 0
+        ):
+            first_step = np.pi + yaw
+            second_step = np.pi - desired_heading
+            counter_clockwise_error = -(first_step + second_step)
         else:
-            clockwise_error = (desired_heading - yaw) % (2 * np.pi)
-        counter_clockwise_error = desired_heading - yaw
+            counter_clockwise_error = desired_heading - yaw
 
         clockwise_deg_error = np.rad2deg(clockwise_error)
         counter_clockwise_deg_error = np.rad2deg(counter_clockwise_error)
@@ -121,17 +126,18 @@ def main():
         # error = error % (2 * np.pi) - np.pi
         # if error > np.pi / 2:
         #     error = 1
-        # elif error < - np.pi / 2:
+        # elif error < -np.pi / 2:
         #     error = -1
         # else:
         #     error = np.sin(error)
-        # set vertical power
+        # output = pid.update(error, error_derivative=yaw_rate)
+        set_rotation_power(mav, output)
 
         # if output < 0:
         #     set_rotation_power(mav, -output)
         # else:
         #     set_rotation_power(mav, output)
-        set_rotation_power(mav, output)
+        # set_rotation_power(mav, output)
 
 
 if __name__ == "__main__":
